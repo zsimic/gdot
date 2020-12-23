@@ -25,13 +25,13 @@ def complain(message):
             sys.stderr.write("\n")
 
 
-def env_var_value(*names, default=None):
+def env_var_value(*names, **kwargs):
     for name in names:
         value = os.environ.get(name)
         if value:
             return value
 
-    return default
+    return kwargs.get("default")
 
 
 class GDotOfficer:
@@ -53,11 +53,19 @@ class GDotOfficer:
         table = PrettyTable(2, border=border)
         table.header[0].align = "right"
         table.header[1].style = "bold"
-        table.add_row("gdot", "%s%s (%s)" % (runez.dim("v"), runez.yellow(__version__), runez.dim(self.store_path)))
+        vid = "v%s" % __version__
+        if self.store_path != GDOT_GIT_STORE:
+            vid += runez.dim(" (%s)" % self.store_path)
+
+        table.add_row("gdot", vid)
         table.add_row("args", runez.log.spec.argv)
-        pv = ".".join(str(n) for n in sys.version_info[:3])
-        table.add_row("python", "%s (v%s)" % (runez.short(sys.executable), runez.yellow(pv)))
-        if sys.prefix and sys.executable and not sys.executable.startswith(sys.prefix):
+        python_info = ".".join(str(n) for n in sys.version_info[:3])
+        prefix = getattr(sys, "real_prefix", getattr(sys, "base_prefix", sys.prefix))
+        if prefix:
+            python_info += runez.dim(" (%s)" % runez.short(prefix))
+
+        table.add_row("python", python_info)
+        if sys.prefix != prefix:
             table.add_row("venv", runez.short(sys.prefix))
 
         table.add_row("platform", runez.run("uname", "-mprs").output)
