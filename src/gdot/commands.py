@@ -7,12 +7,16 @@ To get started, attach to a git repo that will be used to track your files, for 
 For more info see http://gdot.dev
 """
 
+import os
 import sys
 
 import click
 import runez
 
-from gdot import GDot
+from gdot import GDOT_GIT_STORE, GDotOfficer
+
+
+GDOT = None  # type: GDotOfficer
 
 
 def not_implemented():
@@ -27,7 +31,9 @@ def not_implemented():
 @runez.click.color()
 def main(debug):
     """Git my dotfiles"""
+    global GDOT
     runez.log.setup(debug=debug, greetings=":: {argv}")
+    GDOT = GDotOfficer()
 
 
 @main.command()
@@ -82,7 +88,7 @@ def git():
     Run a git command on the dotfiles repo
 
     This is the same as running:
-        cd {gdot_store}
+        cd {store_path}
         git ...
     """
     not_implemented()
@@ -148,7 +154,7 @@ def prettify_epilogs(command=None):
     if isinstance(command, click.Command):
         help = command.help
         if help:
-            help = GDot.formatted(help.strip())
+            help = help.strip().format(userid=os.environ.get("USER", "USERID"), store_path=GDOT_GIT_STORE)
             command.help = help
             epilog = command.epilog
             if not epilog:
@@ -162,7 +168,7 @@ def prettify_epilogs(command=None):
                     epilog = epilog
 
             if epilog:
-                command.epilog = GDot.formatted(epilog)
+                command.epilog = epilog.format(userid=os.environ.get("USER", "USERID"), store_path=GDOT_GIT_STORE)
 
     if isinstance(command, click.Group) and command.commands:
         for cmd in command.commands.values():

@@ -1,21 +1,81 @@
 import os
+import sys
 
 import runez
+from runez.render import PrettyTable
 
 
 __version__ = "0.0.1"
 GDOT_GIT_STORE = "~/.config/gdot-git-store"
+ISSUES_URL = "https://github.com/codrsquad/gdot/issues"
 
 
-class GDot:
+ISSUE_TEMPLATE = """
+Please {report} this issue to us on %s
+Here's a snippet you can include in your report to help us triage:
+
+{diagnostics}
+""" % ISSUES_URL
+
+
+def complain(message):
+    if message:
+        sys.stderr.write(message)
+        if not message.endswith("\n"):
+            sys.stderr.write("\n")
+
+
+def env_var_value(*names, default=None):
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
+
+    return default
+
+
+class GDotOfficer:
     """Handling of the gdot store"""
 
-    gdot_store = runez.resolved_path(GDOT_GIT_STORE)
-    current_user = os.environ.get("USER")
+    def __init__(self):
+        if os.geteuid() == 0:
+            complain("%s was not designed to run as %s\n\n" % (runez.blue("gdot"), runez.red("root")))
+            complain("Please %s if you see a use-case for that on %s\n\n" % (runez.yellow("let us know"), ISSUES_URL))
+            sys.exit(1)
 
-    @classmethod
-    def formatted(cls, text):
-        if text:
-            text = text.format(userid=cls.current_user or "USERID", gdot_store=runez.short(cls.gdot_store))
+        self.userid = os.environ.get("USER")
+        self.store_path = env_var_value("GDOT_GIT_STORE", default=GDOT_GIT_STORE)
+        self.git_store = runez.resolved_path(self.store_path)
+        if not self.userid:
+            self.abort("Could not determine userid")
 
-        return text
+    def get_diagnostics(self, border="colon"):
+        table = PrettyTable(2, border=border)
+        table.header[0].align = "right"
+        table.header[1].style = "bold"
+        table.add_row("gdot", "%s%s (%s)" % (runez.dim("v"), runez.yellow(__version__), runez.dim(self.store_path)))
+        table.add_row("args", runez.log.spec.argv)
+        pv = ".".join(str(n) for n in sys.version_info[:3])
+        table.add_row("python", "%s (v%s)" % (runez.short(sys.executable), runez.yellow(pv)))
+        if sys.prefix and sys.executable and not sys.executable.startswith(sys.prefix):
+            table.add_row("venv", runez.short(sys.prefix))
+
+        table.add_row("platform", runez.run("uname", "-mprs").output)
+        table.add_row("shell", runez.short(env_var_info("SHELL")))
+        table.add_row("terminal", runez.short(env_var_info("TERM_PROGRAM", "LC_TERMINAL")))
+        table.add_row("TERM", runez.short(env_var_info("TERM")))
+        return str(table)
+
+    def abort(self, message):
+        complain(message)
+        instructions = ISSUE_TEMPLATE.format(report=runez.red("report"), diagnostics=self.get_diagnostics())
+        complain(instructions)
+        sys.exit(1)
+
+
+def env_var_info(*names):
+    value = env_var_value(*names)
+    if not value:
+        value = runez.dim("-unknown-")
+
+    return value
