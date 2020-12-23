@@ -5,7 +5,7 @@ if __name__ == "__main__":
     setup(
         name="gdot",
         setup_requires="setupmeta",
-        versioning="dev",
+        versioning="branch(main):dev",
         author="Zoran Simic zoran@simicweb.com",
         url="https://github.com/codrsquad/",
         entry_points={
