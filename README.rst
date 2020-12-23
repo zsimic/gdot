@@ -1,7 +1,7 @@
 Git my dotfiles!
 ================
 
-.. image:: https://img.shields.io/pypi/v/pickley.svg
+.. image:: https://img.shields.io/pypi/v/gdot.svg
     :target: https://pypi.org/project/gdot/
     :alt: Version on pypi
 
@@ -9,7 +9,7 @@ Git my dotfiles!
     :target: https://github.com/codrsquad/gdot/actions
     :alt: Tested with Github Actions
 
-.. image:: https://img.shields.io/pypi/pyversions/pickley.svg
+.. image:: https://img.shields.io/pypi/pyversions/gdot.svg
     :target: https://github.com/codrsquad/gdot
     :alt: Python versions tested (link to github project)
 
