@@ -1,6 +1,19 @@
 Git my dotfiles!
 ================
 
+.. image:: https://img.shields.io/pypi/v/pickley.svg
+    :target: https://pypi.org/project/gdot/
+    :alt: Version on pypi
+
+.. image:: https://github.com/codrsquad/gdot/workflows/Tests/badge.svg
+    :target: https://github.com/codrsquad/gdot/actions
+    :alt: Tested with Github Actions
+
+.. image:: https://img.shields.io/pypi/pyversions/pickley.svg
+    :target: https://github.com/codrsquad/gdot
+    :alt: Python versions tested (link to github project)
+
+
 ``gdot`` is a python CLI that allows to easily roam one's dotfile configs
 (such as ``~/.bashrc`` and ``~/.config/...``) between multiple machines.
 
