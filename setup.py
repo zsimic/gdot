@@ -14,7 +14,8 @@ if __name__ == "__main__":
             ],
         },
         classifiers=[
-            "Development Status :: 5 - Production/Stable",
+            "Development Status :: 2 - Pre-Alpha",
+            # "Development Status :: 5 - Production/Stable",
             "Environment :: Console",
             "Intended Audience :: Developers",
             "Intended Audience :: End Users/Desktop",

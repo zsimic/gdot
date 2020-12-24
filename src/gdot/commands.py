@@ -13,27 +13,38 @@ import sys
 import click
 import runez
 
-from gdot import GDOT_GIT_STORE, GDotOfficer
+from gdot import complain, GDotX
 
 
-GDOT = None  # type: GDotOfficer
+GDOTX = None  # type: GDotX
 
 
 def not_implemented():
     caller = runez.system.find_caller_frame()
-    sys.exit("gdot %s is not yet implemented" % runez.red(caller.f_code.co_name))
+    cmd = "gdot %s" % caller.f_code.co_name
+    sys.exit("%s is not yet implemented" % runez.red(cmd))
+
+
+def require_userid():
+    if not GDOTX.gv.userid:
+        GDOTX.abort("Could not determine userid")
 
 
 @runez.click.group(epilog=__doc__)
-@runez.click.version()
+@runez.click.version(message="gdot %(version)s")
 @runez.click.debug()
 @runez.click.dryrun()
 @runez.click.color()
 def main(debug):
-    """Git my dotfiles"""
-    global GDOT
-    runez.log.setup(debug=debug, greetings=":: {argv}")
-    GDOT = GDotOfficer()
+    """Git my dotfiles!"""
+    global GDOTX
+    if os.geteuid() == 0:
+        complain("%s was not designed to run as %s\n\n" % (runez.blue("gdot"), runez.red("root")))
+        complain("Please %s if you see a use-case for that on %s\n\n" % (runez.yellow("let us know"), GDotX.gv.issues_url))
+        sys.exit(1)
+
+    GDOTX = GDotX()
+    runez.log.setup(debug=debug, console_format="%(levelname)s %(message)s", locations=None, greetings=":: {argv}")
 
 
 @main.command()
@@ -63,7 +74,8 @@ def attach(url):
     - handy shortcuts such as 'github:{userid}' or 'gitlab:{userid}'
     - full url to a git repo such as 'git@github.com:{userid}/dotfiles.git'
     """
-    print(url)
+    require_userid()
+    GDOTX.attach(url)
 
 
 @main.command()
@@ -74,6 +86,12 @@ def detach():
     but gdot won't consider them linked with any remote
     """
     not_implemented()
+
+
+@main.command()
+def diagnostics():
+    """Show system information"""
+    print(GDOTX.get_diagnostics())
 
 
 @main.command()
@@ -88,7 +106,7 @@ def git():
     Run a git command on the dotfiles repo
 
     This is the same as running:
-        cd {store_path}
+        cd {default_store}
         git ...
     """
     not_implemented()
@@ -145,36 +163,6 @@ def rm():
     not_implemented()
 
 
-def prettify_epilogs(command=None):
-    """
-    Conveniently re-arrage docstrings in click-decorated function in such a way that:
-    - .help shows the first line of the docstring
-    - .epilog shows the rest
-    """
-    if isinstance(command, click.Command):
-        help = command.help
-        if help:
-            help = help.strip().format(userid=os.environ.get("USER", "USERID"), store_path=GDOT_GIT_STORE)
-            command.help = help
-            epilog = command.epilog
-            if not epilog:
-                lines = help.splitlines()
-                if len(lines) > 1 and lines[0].strip():
-                    command.help = lines.pop(0).strip()
-                    epilog = "\n".join(lines)
-                    if len(lines) > 1 and not lines[0]:
-                        epilog = "\b%s" % epilog
-
-                    epilog = epilog
-
-            if epilog:
-                command.epilog = epilog.format(userid=os.environ.get("USER", "USERID"), store_path=GDOT_GIT_STORE)
-
-    if isinstance(command, click.Group) and command.commands:
-        for cmd in command.commands.values():
-            prettify_epilogs(cmd)
-
-
-prettify_epilogs(main)
-if __name__ == "__main__":
+runez.click.prettify_epilogs(main, formatter=GDotX.gv.formatted)
+if __name__ == "__main__":  # pragma: no cover, invoked this way by debugger
     main()
