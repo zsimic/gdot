@@ -6,7 +6,7 @@ from runez import cached_property, chill_property
 from runez.render import PrettyTable
 
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 ISSUE_TEMPLATE = """
 Please {report} this issue to us on {issues_url}
