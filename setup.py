@@ -7,7 +7,7 @@ if __name__ == "__main__":
         setup_requires="setupmeta",
         versioning="branch(main):dev",
         author="Zoran Simic zoran@simicweb.com",
-        url="https://github.com/codrsquad/",
+        url="https://github.com/codrsquad/gdot",
         entry_points={
            "console_scripts": [
                "gdot = gdot.commands:main",
