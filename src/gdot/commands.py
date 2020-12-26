@@ -13,10 +13,10 @@ import sys
 import click
 import runez
 
-from gdot import complain, GDotX
+from gdot import GDEnv, GDotXBase
 
 
-GDOTX = None  # type: GDotX
+GDOTX = None  # type: GDotXBase
 
 
 def not_implemented():
@@ -26,8 +26,8 @@ def not_implemented():
 
 
 def require_userid():
-    if not GDOTX.gv.userid:
-        GDOTX.abort("Could not determine userid")
+    if not GDEnv.userid:
+        GDEnv.abort("Could not determine userid")
 
 
 @runez.click.group(epilog=__doc__)
@@ -39,11 +39,11 @@ def main(debug):
     """Git my dotfiles!"""
     global GDOTX
     if os.geteuid() == 0:
-        complain("%s was not designed to run as %s\n\n" % (runez.blue("gdot"), runez.red("root")))
-        complain("Please %s if you see a use-case for that on %s\n\n" % (runez.yellow("let us know"), GDotX.gv.issues_url))
+        GDEnv.complain("%s was not designed to run as %s\n\n" % (runez.blue("gdot"), runez.red("root")))
+        GDEnv.complain("Please %s if you see a use-case for that on %s\n\n" % (runez.yellow("let us know"), GDEnv.issues_url))
         sys.exit(1)
 
-    GDOTX = GDotX()
+    GDOTX = GDotXBase()
     runez.log.setup(debug=debug, console_format="%(levelname)s %(message)s", locations=None, greetings=":: {argv}")
 
 
@@ -89,9 +89,10 @@ def detach():
 
 
 @main.command()
-def diagnostics():
+@click.option("--verbose", "-v", is_flag=True, help="Show more information")
+def diagnostics(verbose):
     """Show system information"""
-    print(GDOTX.get_diagnostics())
+    print(GDEnv.diagnostics(verbose))
 
 
 @main.command()
@@ -115,12 +116,6 @@ def git():
 @main.command()
 def list():
     """List currently tracked files/folders"""
-    not_implemented()
-
-
-@main.command()
-def neofetch():
-    """Convenience neofetch clone, but *much* faster"""
     not_implemented()
 
 
@@ -163,6 +158,6 @@ def rm():
     not_implemented()
 
 
-runez.click.prettify_epilogs(main, formatter=GDotX.gv.formatted)
+runez.click.prettify_epilogs(main, formatter=GDEnv.formatted)
 if __name__ == "__main__":  # pragma: no cover, invoked this way by debugger
     main()

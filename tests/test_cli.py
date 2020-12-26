@@ -4,15 +4,23 @@ import sys
 import runez
 from mock import patch
 
-from gdot import GDotX
+from gdot import GDEnv
 
 
 def test_attach(cli):
-    GDotX.gv.userid = None
+    GDEnv.userid = None
     cli.run("attach", "url")
     assert cli.failed
     assert "Could not determine user" in cli.logged
-    GDotX.gv.userid = "tester"
+    GDEnv.userid = "tester"
+
+
+def test_diagnostics(cli):
+    cli.run("diagnostics")
+    assert cli.succeeded
+
+    cli.run("diagnostics", "-v")
+    assert cli.succeeded
 
 
 def test_main():
@@ -35,10 +43,10 @@ def test_sanity_check(cli):
 
     cli.run("git", "--help")
     assert cli.succeeded
-    assert GDotX.gv.default_store in cli.logged
+    assert GDEnv.default_store in cli.logged
 
 
 def test_secondary_commands(cli):
     cli.run("diagnostics")
     assert cli.succeeded
-    assert "terminal : -unknown-" in cli.logged
+    assert "TERM : -unknown-" in cli.logged

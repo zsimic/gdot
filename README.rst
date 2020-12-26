@@ -13,8 +13,8 @@ Git my dotfiles!
     :target: https://github.com/codrsquad/gdot
     :alt: Python versions tested (link to github project)
 
-.. warning::
-    This is a preview project, not ready for use yet, most of the implementation is not there yet
+.. note::
+    This is a work-in-progress project, not ready for use yet, most of the implementation is not there yet
 
 ----------------
 
