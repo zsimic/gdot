@@ -14,6 +14,7 @@ import click
 import runez
 
 from gdot import GDEnv, GDotXBase
+from gdot.srv import DCService
 
 
 GDOTX = None  # type: GDotXBase
@@ -156,6 +157,40 @@ def symlink(folder):
 def rm():
     """Untrack a file"""
     not_implemented()
+
+
+@main.group()
+def srv():
+    """Manage services wrapped in docker-compose"""
+    runez.log.progress.start()
+
+
+@srv.command()
+@click.argument("name")
+def install(name):
+    """Install service"""
+    DCService(name).install()
+
+
+@srv.command()
+@click.argument("name")
+def start(name):
+    """Start service"""
+    DCService(name).start()
+
+
+@srv.command()
+@click.argument("name")
+def stop(name):
+    """Start service"""
+    DCService(name).stop()
+
+
+@srv.command()
+@click.argument("name")
+def sync(name):
+    """Sync service"""
+    DCService(name).sync()
 
 
 runez.click.prettify_epilogs(main, formatter=GDEnv.formatted)

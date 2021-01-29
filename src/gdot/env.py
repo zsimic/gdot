@@ -216,8 +216,7 @@ class GDEnvBase:
         table = PrettyTable(2, border=border)
         table.header[0].align = "right"
         table.header[1].style = "bold"
-        term_width = runez.terminal_width()
-        rows = list()
+        term_width = runez.TERMINAL_INFO.columns
         col1 = 0
         col2 = 0
         rows = []
