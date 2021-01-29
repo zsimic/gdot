@@ -34,7 +34,7 @@ def require_userid():
 @runez.click.group(epilog=__doc__)
 @runez.click.version(message="gdot %(version)s")
 @runez.click.debug()
-@runez.click.dryrun()
+@runez.click.dryrun("-n")
 @runez.click.color()
 def main(debug):
     """Git my dotfiles!"""
