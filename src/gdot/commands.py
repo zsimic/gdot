@@ -193,6 +193,13 @@ def sync(name):
     DCService(name).sync()
 
 
+@srv.command()
+@click.argument("name")
+def upgrade(name):
+    """Upgrade service"""
+    DCService(name).upgrade()
+
+
 runez.click.prettify_epilogs(main, formatter=GDEnv.formatted)
 if __name__ == "__main__":  # pragma: no cover, invoked this way by debugger
     main()

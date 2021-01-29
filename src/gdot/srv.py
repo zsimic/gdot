@@ -50,13 +50,26 @@ class DCService(object):
 
         runez.run("sudo", "mkdir", self.target)
         runez.run("sudo", "chown", os.environ.get("USER"), self.target)
-        runez.run("sudo", "rsync", "-aHJ", "%s/" % self.origin, self.target, self.target)
+        runez.run("sudo", "rsync", "-aHJ", "%s/" % self.origin, self.target)
 
     def start(self):
         self.validate()
+        with runez.CurrentFolder(self.target):
+            runez.run("docker-compose", "up", "-d")
 
     def stop(self):
         self.validate()
+        with runez.CurrentFolder(self.target):
+            runez.run("docker-compose", "stop")
 
     def sync(self):
         self.validate()
+        runez.run("sudo", "rsync", "-aHJ", "%s/" % self.target, self.origin)
+
+    def upgrade(self):
+        self.stop()
+        with runez.CurrentFolder(self.target):
+            runez.run("docker-compose", "pull")
+            runez.run("docker-compose", "prune", "-f")
+
+        self.start()
