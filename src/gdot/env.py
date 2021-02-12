@@ -148,7 +148,7 @@ class GDEnvBase:
     """Environment related stuff"""
 
     default_store = "~/.config/gdot-git-store"
-    issues_url = "https://github.com/codrsquad/gdot/issues"
+    issues_url = "https://github.com/zsimic/gdot/issues"
 
     user_home = None  # type: str # User ~ folder (unless running in test mode)
     store_home = None  # type: str # Store base folder

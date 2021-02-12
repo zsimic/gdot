@@ -5,12 +5,12 @@ Git my dotfiles!
     :target: https://pypi.org/project/gdot/
     :alt: Version on pypi
 
-.. image:: https://github.com/codrsquad/gdot/workflows/Tests/badge.svg
-    :target: https://github.com/codrsquad/gdot/actions
+.. image:: https://github.com/zsimic/gdot/workflows/Tests/badge.svg
+    :target: https://github.com/zsimic/gdot/actions
     :alt: Tested with Github Actions
 
 .. image:: https://img.shields.io/pypi/pyversions/gdot.svg
-    :target: https://github.com/codrsquad/gdot
+    :target: https://github.com/zsimic/gdot
     :alt: Python versions tested (link to github project)
 
 .. note::
