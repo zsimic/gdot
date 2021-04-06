@@ -39,6 +39,7 @@ def require_userid():
 def main(debug):
     """Git my dotfiles!"""
     global GDOTX
+    runez.system.AbortException = SystemExit
     if os.geteuid() == 0:
         GDEnv.complain("%s was not designed to run as %s\n\n" % (runez.blue("gdot"), runez.red("root")))
         GDEnv.complain("Please %s if you see a use-case for that on %s\n\n" % (runez.yellow("let us know"), GDEnv.issues_url))
@@ -90,10 +91,9 @@ def detach():
 
 
 @main.command()
-@click.option("--verbose", "-v", is_flag=True, help="Show more information")
-def diagnostics(verbose):
+def diagnostics():
     """Show system information"""
-    print(GDEnv.diagnostics(verbose))
+    print(GDEnv.diagnostics())
 
 
 @main.command()
