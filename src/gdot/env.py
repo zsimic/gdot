@@ -4,7 +4,7 @@ import os
 import sys
 
 import runez
-from runez import cached_property, chill_property
+from runez import cached_property
 from runez.pyenv import PythonDepot
 from runez.render import PrettyTable
 
@@ -60,7 +60,7 @@ class GDEnvBase:
 
     def _diagnostics(self):
         yield "base", self.base_folder
-        yield "invoker python", PythonDepot(pyenv=None, use_path=False).invoker.representation()
+        yield "invoker python", PythonDepot(use_path=False).invoker.representation()
 
     def diagnostics(self):
         return PrettyTable.two_column_diagnostics(self._diagnostics)

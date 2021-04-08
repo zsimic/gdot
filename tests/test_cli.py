@@ -18,9 +18,7 @@ def test_attach(cli):
 def test_diagnostics(cli):
     cli.run("diagnostics")
     assert cli.succeeded
-
-    cli.run("diagnostics", "-v")
-    assert cli.succeeded
+    assert "sys.executable" in cli.logged
 
 
 def test_main():
@@ -44,9 +42,3 @@ def test_sanity_check(cli):
     cli.run("git", "--help")
     assert cli.succeeded
     assert GDEnv.default_store in cli.logged
-
-
-def test_secondary_commands(cli):
-    cli.run("diagnostics")
-    assert cli.succeeded
-    assert "TERM : -unknown-" in cli.logged
