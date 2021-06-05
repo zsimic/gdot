@@ -19,7 +19,7 @@ Here's a snippet you can include in your report to help us triage:
 
 class BaseFolder:
     def __init__(self, default):
-        path = runez.SYS_INFO.dev_folder(os.path.basename(default))
+        path = runez.DEV.venv_path(os.path.basename(default))
         if not path:
             path = os.environ.get("GDOT_GIT_STORE")
 
