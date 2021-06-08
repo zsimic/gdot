@@ -63,7 +63,7 @@ class GDEnvBase:
         yield "invoker python", PythonDepot(use_path=False).invoker.representation()
 
     def diagnostics(self):
-        return PrettyTable.two_column_diagnostics(self._diagnostics)
+        return PrettyTable.two_column_diagnostics(self._diagnostics(), runez.SYS_INFO.diagnostics())
 
     @cached_property
     def _unknown(self):
