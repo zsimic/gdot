@@ -60,7 +60,8 @@ class GDEnvBase:
 
     def _diagnostics(self):
         yield "base", self.base_folder
-        yield "invoker python", PythonDepot(use_path=False).invoker.representation()
+        depot = PythonDepot(use_path=False)
+        yield "invoker python", depot.invoker
 
     def diagnostics(self):
         return PrettyTable.two_column_diagnostics(self._diagnostics(), runez.SYS_INFO.diagnostics())
