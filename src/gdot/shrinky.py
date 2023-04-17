@@ -121,9 +121,6 @@ class ColorSet:
         return self.name
 
 
-TTYC = ColorSet.tty_color_set()
-
-
 def shortened_path(prefix, parts, max_parts=6):
     yield prefix
     if len(parts) > max_parts:
@@ -411,6 +408,9 @@ class CommandDef:
 
 
 class CommandParser:
+
+    __ttyc = None  # type: ColorSet
+
     def __init__(self):
         self.available_commands = {}
 
@@ -420,6 +420,13 @@ class CommandParser:
                 name = k[4:]
                 cmd_def = CommandDef(cmd, name, delimiter)
                 self.available_commands[name] = cmd_def
+
+    @classmethod
+    def ttyc(cls):
+        if cls.__ttyc is None:
+            cls.__ttyc = ColorSet.tty_color_set()
+
+        return cls.__ttyc
 
     @staticmethod
     def warn(msg):
@@ -444,7 +451,7 @@ class CommandParser:
         print(__doc__)
         print("\nCommands:")
         for name, cmd in sorted(self.available_commands.items()):
-            print("  %s%s" % (TTYC.bold("%-18s" % name), cmd.summary()))
+            print("  %s%s" % (self.ttyc().bold("%-18s" % name), cmd.summary()))
 
         if exit_code is not None:
             sys.exit(exit_code)
