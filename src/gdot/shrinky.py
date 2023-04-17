@@ -11,9 +11,9 @@ from pathlib import Path
 
 
 def run_program(*args: str):
-    import subprocess
+    import subprocess  # nosec B404
 
-    p = subprocess.run(args, stdout=subprocess.PIPE)
+    p = subprocess.run(args, stdout=subprocess.PIPE, shell=False)  # nosec B603
     if p.returncode == 0 and p.stdout:
         return p.stdout.decode("utf-8").strip()
 
@@ -176,8 +176,8 @@ class Ps1Renderer(CommandRenderer):
 
     exit_code = "0"
     owner = ""
-    pwd = ""
-    shell = "zsh"
+    pwd = ""  # nosec B105
+    shell = ""
     window = ""
     user = ""
     venv = ""

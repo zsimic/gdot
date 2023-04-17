@@ -38,6 +38,10 @@ def test_invalid(cli, monkeypatch):
     assert cli.failed
     assert cli.logged.stderr.contents() == "Unrecognized argument 'foo'\n"
 
+    cli.run("ps1", main=main)
+    assert cli.failed
+    assert cli.logged.stderr.contents() == "Shell '' not supported\n"
+
     cli.run("ps1 -sfoo", main=main)
     assert cli.failed
     assert cli.logged.stderr.contents() == "Shell 'foo' not supported\n"
@@ -48,7 +52,7 @@ def test_invalid(cli, monkeypatch):
 
     # Simple message on stderr on crash
     monkeypatch.setattr(gdot.shrinky, "folder_parts", lambda *_: None)
-    cli.run("ps1 -pfoo/bar", main=main)
+    cli.run("ps1 -szsh -pfoo/bar", main=main)
     assert cli.failed
     assert cli.logged.stderr.contents() == "'ps1()' crashed: cannot unpack non-iterable NoneType object\n"
 
@@ -66,7 +70,7 @@ def test_deep_ps1(cli, monkeypatch):
 
     # Simulate docker
     monkeypatch.setattr(gdot.shrinky.Ps1Renderer, "dockerenv", ".")
-    cli.run("ps1", main=main)
+    cli.run("ps1 -szsh", main=main)
     assert cli
     assert cli.logged.stdout.contents() == "🐳 %F{green}:%f \n"
 
