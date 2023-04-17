@@ -1,8 +1,8 @@
+import os
 import subprocess
 import sys
 
 import runez
-from mock import patch
 
 from gdot import GDEnv
 
@@ -27,11 +27,11 @@ def test_main():
     assert "For more info see" in r
 
 
-def test_no_root(cli):
-    with patch("os.geteuid", return_value=0):
-        cli.run("diagnostics", "--help")
-        assert cli.failed
-        assert "gdot was not designed to run as root" in cli.logged
+def test_no_root(cli, monkeypatch):
+    monkeypatch.setattr(os, "geteuid", lambda: 0)
+    cli.run("diagnostics", "--help")
+    assert cli.failed
+    assert "gdot was not designed to run as root" in cli.logged
 
 
 def test_sanity_check(cli):
