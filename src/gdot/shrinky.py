@@ -155,6 +155,7 @@ class PathCleaner(CommandRenderer):
     path = ""
 
     def cmd_clean_path(self):
+        """Remove duplicates in PATH (but keep order)"""
         path = self.path or os.environ.get("PATH")
         seen = set()
         for folder in path.split(os.pathsep):
