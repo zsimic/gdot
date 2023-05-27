@@ -17,17 +17,17 @@ def test_clean_path(cli):
 def test_help(cli):
     cli.run("--help", main=main)
     assert cli.succeeded
-    assert "Usage:" in cli.logged.stdout
+    assert "Usage:" in cli.logged.stderr
 
     cli.run("tmux_status --help", main=main)
     assert cli.succeeded
-    assert "Example:\n  set -g status-right" in cli.logged.stdout
+    assert "Example:\n  set -g status-right" in cli.logged.stderr
 
 
 def test_invalid(cli, monkeypatch):
     cli.run("", main=main)
     assert cli.failed
-    assert cli.logged.stderr.contents() == "No command provided\n"
+    assert "No command provided" in cli.logged.stderr
 
     cli.run("foo", main=main)
     assert cli.failed

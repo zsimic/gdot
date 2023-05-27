@@ -10,9 +10,48 @@ import sys
 from pathlib import Path
 
 
+class Logger:
+
+    logger = None
+
+    @classmethod
+    def enable_logging(cls):  # pragma: no cover
+        import logging
+
+        logging.basicConfig(
+            filename=os.path.expanduser("~/.cache/shrinky.log"),
+            datefmt="%m-%d %H:%M:%S",
+            format="%(asctime)s [%(process)s] %(levelname)s %(message)s",
+            force=True,
+        )
+        cls.logger = logging.getLogger(__name__)
+        logging.root.setLevel(logging.DEBUG)
+        cls.logger.setLevel(logging.DEBUG)
+
+    @classmethod
+    def debug(cls, message, *args):  # pragma: no cover
+        if cls.logger:
+            cls.logger.debug(message, *args)
+
+    @classmethod
+    def warning(cls, msg):  # pragma: no cover
+        print(msg, file=sys.stderr)
+        if cls.logger:
+            cls.logger.warning(msg)
+
+    @classmethod
+    def fail(cls, msg, exit_code=1):
+        print(msg, file=sys.stderr)
+        if cls.logger:  # pragma: no cover
+            cls.logger.error(msg)
+
+        sys.exit(exit_code)
+
+
 def run_program(*args: str):
     import subprocess  # nosec B404
 
+    Logger.debug("Running: %s", args)
     p = subprocess.run(args, stdout=subprocess.PIPE, shell=False)  # nosec B603
     if p.returncode == 0 and p.stdout:
         return p.stdout.decode("utf-8").strip()
@@ -186,7 +225,7 @@ class Ps1Renderer(CommandRenderer):
         """
         colors = ColorSet.ps1_for_shell(self.shell)
         if not colors:
-            CommandParser.fail("Shell '%s' not supported" % self.shell)
+            Logger.fail("Shell '%s' not supported" % self.shell)
 
         if os.path.exists(self.dockerenv):
             yield "🐳 "
@@ -385,26 +424,28 @@ class CommandDef:
         instance = self.base_cls()
         for arg in args:
             if not arg or len(arg) <= 1 or not arg.startswith("-"):
-                CommandParser.fail("Unrecognized argument '%s'" % arg)
+                Logger.fail("Unrecognized argument '%s'" % arg)
 
             key = arg[1]
             value = arg[2:]
             flag = self.base_cls.flags.get(key)
             if not flag:
-                CommandParser.fail("Unknown flag '%s'" % key)
+                Logger.fail("Unknown flag '%s'" % key)
 
             setattr(instance, flag, value)
 
         func = self.get_func(instance=instance)
         bits = list(func())
-        print(self.delimiter.join(x for x in bits if x))
+        response = self.delimiter.join(x for x in bits if x)
+        Logger.debug("%s %s -> %s", self, args, response)
+        print(response)
 
     def show_help(self):
         from textwrap import dedent
 
         doc = self.get_doc()
         doc = dedent(doc).strip()
-        print("%s\n" % doc)
+        print("%s\n" % doc, file=sys.stderr)
         sys.exit(0)
 
 
@@ -429,30 +470,22 @@ class CommandParser:
 
         return cls.__ttyc
 
-    @staticmethod
-    def warn(msg):
-        if msg:
-            print(msg, file=sys.stderr)
-
-    @staticmethod
-    def fail(msg, exit_code=1):
-        CommandParser.warn(msg)
-        sys.exit(exit_code)
-
     def get_command(self, name, fatal=True):
         cmd = self.available_commands.get(name)
         if cmd is None and fatal:
-            self.fail("Unknown command '%s'" % name)
+            Logger.fail("Unknown command '%s'" % name)
 
         return cmd
 
     def show_help(self, msg=None, exit_code=0):
-        self.warn(msg)
-        print("Usage: COMMAND [ARGS]...")
-        print(__doc__)
-        print("\nCommands:")
+        if msg:
+            print(msg, file=sys.stderr)
+
+        print("Usage: COMMAND [ARGS]...", file=sys.stderr)
+        print(__doc__, file=sys.stderr)
+        print("\nCommands:", file=sys.stderr)
         for name, cmd in sorted(self.available_commands.items()):
-            print("  %s%s" % (self.ttyc().bold("%-18s" % name), cmd.summary()))
+            print("  %s%s" % (self.ttyc().bold("%-18s" % name), cmd.summary()), file=sys.stderr)
 
         if exit_code is not None:
             sys.exit(exit_code)
@@ -466,6 +499,11 @@ class CommandParser:
         if cmd == "--help":
             self.show_help()
 
+        if cmd in ("-v", "--debug"):  # pragma: no cover
+            cmd = args[0]
+            args = args[1:]
+            Logger.enable_logging()
+
         cmd = self.get_command(cmd)
         if "--help" in args:
             cmd.show_help()
@@ -474,7 +512,7 @@ class CommandParser:
             cmd.run_with_args(args)
 
         except Exception as e:
-            self.fail("'%s()' crashed: %s" % (cmd.name, e))
+            Logger.fail("'%s()' crashed: %s" % (cmd.name, e))
 
 
 def main(args=None):
