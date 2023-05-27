@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 
 import runez
 
@@ -73,6 +74,12 @@ def test_deep_ps1(cli, monkeypatch):
     cli.run("ps1 -szsh", main=main)
     assert cli
     assert cli.logged.stdout.contents() == "🐳 %F{green}:%f \n"
+
+
+def test_get_path():
+    assert gdot.shrinky.get_path(None) == Path(".")
+    assert gdot.shrinky.get_path("") == Path(".")
+    assert gdot.shrinky.get_path(Path(".")) == Path(".")
 
 
 def test_ps1(cli):

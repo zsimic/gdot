@@ -58,18 +58,16 @@ def run_program(*args: str):
 
 
 def get_path(path):
+    if isinstance(path, Path):
+        return path
+
     if path == "~":
         return Path(os.path.expanduser("~"))
 
-    if path:
-        if not isinstance(path, Path):
-            if path.startswith('"') and path.endswith('"'):
-                path = path.strip('"')
+    if path and path.startswith('"') and path.endswith('"'):
+        path = path.strip('"')
 
-            if path:
-                path = Path(path)
-
-    return path
+    return Path(path or ".")
 
 
 def scm_root(folder: Path):
@@ -512,7 +510,11 @@ class CommandParser:
             cmd.run_with_args(args)
 
         except Exception as e:
-            Logger.fail("'%s()' crashed: %s" % (cmd.name, e))
+            msg = "'%s()' crashed: %s" % (cmd.name, e)
+            if Logger.logger:
+                Logger.logger.error(msg, exc_info=e)
+
+            Logger.fail(msg)
 
 
 def main(args=None):
