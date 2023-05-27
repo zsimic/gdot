@@ -12,37 +12,31 @@ from pathlib import Path
 
 class Logger:
 
+    log_location = "~/.cache/shrinky.log"
     logger = None
 
     @classmethod
-    def enable_logging(cls):  # pragma: no cover
+    def enable_logging(cls):
         import logging
 
         logging.basicConfig(
-            filename=os.path.expanduser("~/.cache/shrinky.log"),
+            filename=os.path.expanduser(cls.log_location),
             datefmt="%m-%d %H:%M:%S",
             format="%(asctime)s [%(process)s] %(levelname)s %(message)s",
-            force=True,
         )
         cls.logger = logging.getLogger(__name__)
         logging.root.setLevel(logging.DEBUG)
         cls.logger.setLevel(logging.DEBUG)
 
     @classmethod
-    def debug(cls, message, *args):  # pragma: no cover
+    def debug(cls, message, *args):
         if cls.logger:
             cls.logger.debug(message, *args)
 
     @classmethod
-    def warning(cls, msg):  # pragma: no cover
-        print(msg, file=sys.stderr)
-        if cls.logger:
-            cls.logger.warning(msg)
-
-    @classmethod
     def fail(cls, msg, exit_code=1):
         print(msg, file=sys.stderr)
-        if cls.logger:  # pragma: no cover
+        if cls.logger:
             cls.logger.error(msg)
 
         sys.exit(exit_code)
@@ -61,11 +55,11 @@ def get_path(path):
     if isinstance(path, Path):
         return path
 
-    if path == "~":
-        return Path(os.path.expanduser("~"))
-
     if path and path.startswith('"') and path.endswith('"'):
         path = path.strip('"')
+
+    if path == "~":
+        return Path(os.path.expanduser("~"))
 
     return Path(path or ".")
 
@@ -95,7 +89,7 @@ class ColorBit:
         self.close_marker = close_marker
         self.wrapper_fmt = wrapper_fmt
 
-    def __repr__(self):  # pragma: no cover, debugger only
+    def __repr__(self):
         return self.__call__(self.name)
 
     def wrapped(self, marker):
@@ -154,7 +148,7 @@ class ColorSet:
 
         return cls("zsh-ps1-colors", bits)
 
-    def __repr__(self):  # pragma: no cover, debugger only
+    def __repr__(self):
         return self.name
 
 
@@ -403,7 +397,7 @@ class CommandDef:
         self.base_cls = base_cls
         self.delimiter = delimiter
 
-    def __repr__(self):  # pragma: no cover, debugger only
+    def __repr__(self):
         return self.name
 
     def get_func(self, instance=None):
@@ -497,7 +491,7 @@ class CommandParser:
         if cmd == "--help":
             self.show_help()
 
-        if cmd in ("-v", "--debug"):  # pragma: no cover
+        if cmd in ("-v", "--debug"):
             cmd = args[0]
             args = args[1:]
             Logger.enable_logging()

@@ -15,6 +15,12 @@ def test_clean_path(cli):
     assert cli.logged.stdout.contents() == "foo:foo/bar\n"
 
 
+def test_colors():
+    x = gdot.shrinky.ColorSet.zsh_ps1_color_set()
+    assert str(x) == "zsh-ps1-colors"
+    assert str(x.bold) == "%Bbold%b"
+
+
 def test_help(cli):
     cli.run("--help", main=main)
     assert cli.succeeded
@@ -53,9 +59,10 @@ def test_invalid(cli, monkeypatch):
 
     # Simple message on stderr on crash
     monkeypatch.setattr(gdot.shrinky, "folder_parts", lambda *_: None)
-    cli.run("ps1 -szsh -pfoo/bar", main=main)
+    cli.run("-v ps1 -szsh -pfoo/bar", main=main)
     assert cli.failed
-    assert cli.logged.stderr.contents() == "'ps1()' crashed: cannot unpack non-iterable NoneType object\n"
+    assert "'ps1()' crashed: cannot unpack non-iterable NoneType object\n" in cli.logged.stderr
+    assert "in cmd_ps1" in cli.logged.stderr
 
 
 def test_deep_ps1(cli, monkeypatch):
@@ -77,9 +84,16 @@ def test_deep_ps1(cli, monkeypatch):
 
 
 def test_get_path():
-    assert gdot.shrinky.get_path(None) == Path(".")
-    assert gdot.shrinky.get_path("") == Path(".")
-    assert gdot.shrinky.get_path(Path(".")) == Path(".")
+    cwd = Path(".")
+    assert gdot.shrinky.get_path(None) == cwd
+    assert gdot.shrinky.get_path("") == cwd
+    assert gdot.shrinky.get_path(".") == cwd
+    assert gdot.shrinky.get_path('"."') == cwd
+    assert gdot.shrinky.get_path(Path(".")) == cwd
+
+    user_dir = Path(os.path.expanduser("~"))
+    assert gdot.shrinky.get_path("~") == user_dir
+    assert gdot.shrinky.get_path('"~"') == user_dir
 
 
 def test_ps1(cli):
@@ -111,8 +125,9 @@ def test_ps1(cli):
     assert cli.logged.stdout.contents() == "\\[\x1b[32m\\]:\\[\x1b[m\\] \n"
 
 
-def test_tmux(cli):
-    cli.run("tmux_short -p%s" % os.environ.get("HOME"), main=main)
+def test_tmux(cli, monkeypatch):
+    monkeypatch.setattr(gdot.shrinky.Logger, "log_location", "test.log")
+    cli.run("-v tmux_short -p%s" % os.environ.get("HOME"), main=main)
     assert cli.succeeded
     assert cli.logged.stdout.contents() == "~\n"
 
